@@ -1,6 +1,7 @@
 local class = require("util.class")
 local const = require("const")
 local states = require("player.states.states")
+local scenes = require("scenes")
 
 local Normal = class("Normal", states.Base)
 
@@ -13,22 +14,26 @@ function Normal:enter()
 end
 
 function Normal:exit(newState)
+    self.player:setHitbox()
 end
 
 function Normal:update()
     local player = self.player
     local ctrl = player.controller
 
+    -- re-set the hitbox every frame, so id is renewed
+    self.player:setHitbox(const.normalHitbox)
+
     if ctrl.forward.state then
         player.posX = player.posX + player.forwardDir * const.walkForwardVel
     end
 
-    if ctrl.action1.pressed then
+    if ctrl.action1:inHistory("pressed", const.attackBufferFrames) then
         player:setState(states.Strike)
         return
     end
 
-    if ctrl.action2.pressed then
+    if ctrl.action2:inHistory("pressed", const.attackBufferFrames) then
         player:setState(states.Tackle)
         return
     end
@@ -51,9 +56,9 @@ end
 
 function Normal:hit(_type)
     if _type == "tackle" then
-        self.player:getOpponent():die()
+        -- ignore
     else
-        states.Base.hit(self, _type)
+        return states.Base.hit(self, _type)
     end
 end
 

@@ -29,7 +29,7 @@ local function inputStateFunction(player, inputIndex)
         end
     else
         return function()
-            return love.keyboard.isDown(controlSet[player][inputIndex])
+            return lk.isDown(controlSet[player][inputIndex])
         end
     end
 end
@@ -65,6 +65,24 @@ local function inputInHistory(self, field, time)
     return nil
 end
 
+local function updateController(self)
+    for _, inputName in ipairs(inputNames) do
+        local inputState = self[inputName]
+        -- push old state to history
+        inputState.history[inputState.nextHistoryIndex] = inputState.state
+        inputState.nextHistoryIndex = inputState.nextHistoryIndex + 1
+        if inputState.nextHistoryIndex > maxHistory then
+            inputState.nextHistoryIndex = 1
+        end
+
+        -- update state
+        inputState.lastState = inputState.state
+        inputState.state = inputState.stateFunc()
+        inputState.pressed = inputState.state and not inputState.lastState
+        inputState.released = not inputState.state and inputState.lastState
+    end
+end
+
 for player = 1, 2 do
     local ctrl = {}
     for inputIndex = 1, 6 do
@@ -82,27 +100,27 @@ for player = 1, 2 do
     input.controllers[player] = ctrl
 end
 
-local function updateController(ctrl)
-    for _, inputName in ipairs(inputNames) do
-        local inputState = ctrl[inputName]
-        -- push old state to history
-        inputState.history[inputState.nextHistoryIndex] = inputState.state
-        inputState.nextHistoryIndex = inputState.nextHistoryIndex + 1
-        if inputState.nextHistoryIndex > maxHistory then
-            inputState.nextHistoryIndex = 1
-        end
-
-        -- update state
-        inputState.lastState = inputState.state
-        inputState.state = inputState.stateFunc()
-        inputState.pressed = inputState.state and not inputState.lastState
-        inputState.released = not inputState.state and inputState.lastState
+input.dummyController = {}
+for inputIndex = 1, 6 do
+    local inputState = {
+        stateFunc = function() return false end,
+        lastState = false,
+        state = false,
+        pressed = false,
+        released = false,
+        history = {},
+        nextHistoryIndex = maxHistory,
+        inHistory = inputInHistory,
+    }
+    for i = 1, maxHistory do
+        inputState.history[i] = false
     end
+    input.dummyController[inputNames[inputIndex]] = inputState
 end
 
 function input.update()
-    for player = 1, 2 do
-        updateController(input.controllers[player])
+    for i = 1, 2 do
+        updateController(input.controllers[i])
     end
 end
 

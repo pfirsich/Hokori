@@ -27,10 +27,13 @@ local const = {
 
     spawnEdgeDistance = 20,
 
+    attackBufferFrames = 8,
+
     walkForwardVel = 0.24,
     walkBackwardVel = 0.18,
+    normalHitbox = {"normal", -5, -10, 15, 8},
 
-    dashInputWindow = 9,
+    dashInputWindow = 8,
     dashFowardVel = 1.0,
     dashBackwardVel = 1.0,
     dashDuration = 12,
@@ -71,7 +74,15 @@ local const = {
         {"startup2", 8},
         {"active", 12},
         {"recovery", 30},
-    }
+    },
+
+    deathFreezeDuration = 40,
+    deathDuration = 160,
+
+    scoreBlinkDuration = 3.0,
+    scoreBlinkFrequency = 3.0,
+
+    blockParticleNum = 50,
 }
 
 return const

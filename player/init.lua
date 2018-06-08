@@ -2,6 +2,7 @@ local const = require("const")
 local class = require("util.class")
 local umath = require("util.math")
 local input = require("input")
+local sounds = require("sounds")
 local states_ = require("player.states")
 local states = require("player.states.states")
 
@@ -10,10 +11,13 @@ local players = {}
 local PlayerClass = class("Player")
 players.Player = PlayerClass
 
-function PlayerClass:initialize(playerId, controller, leftSide)
+function PlayerClass:initialize(playerId, leftSide)
     self.id = playerId
-    self.controller = controller
+    self.controller = input.controllers[self.id]
 
+    self.visible = true
+    self.dead = false
+    self.time = 0
     self.score = 0
     self.posY = const.resY - 2
     self.spawnPosX = ({const.spawnEdgeDistance, const.resX - const.spawnEdgeDistance})[self.id]
@@ -27,18 +31,22 @@ function PlayerClass:initialize(playerId, controller, leftSide)
         length = 0,
     }
     self.hitbox = nil
+    self.hitboxCounter = 0
+    self.lastHitBy = -1
     self:setState(states.Normal)
 end
 
-function PlayerClass:setHitbox(_type, x, y, w, h)
-    if _type == nil then
+function PlayerClass:setHitbox(hitbox)
+    if hitbox == nil then
         self.hitbox = nil
     else
         self.hitbox = {
-            _type = _type,
-            x = x, y = y,
-            w = w, h = h,
+            id = self.hitboxCounter,
+            _type = hitbox[1],
+            x = hitbox[2], y = hitbox[3],
+            w = hitbox[4], h = hitbox[5],
         }
+        self.hitboxCounter = self.hitboxCounter + 1
     end
 end
 
@@ -104,30 +112,40 @@ end
 
 function PlayerClass:respawn()
     self.posX = self.spawnPosX
-    self:updateDir(leftSide)
+    self.controller = input.controllers[self.id]
+    self:updateDir()
     self.hitbox = nil
     self:setState(states.Normal)
+    self.visible = true
+    self.dead = false
 end
 
 function PlayerClass:die()
+    self:uncontrol()
+    self:setState(states.Dead)
+    self.dead = true
+end
+
+function PlayerClass:uncontrol()
+    self.controller = input.dummyController
+    self:updateDir() -- to prepare the dummy controller
+end
+
+function PlayerClass:checkHit()
     local opp = self:getOpponent()
-    opp.score = opp.score + 1
-    self:respawn()
-    opp:respawn()
+    if opp.hitbox and opp.hitbox.id > self.lastHitBy then
+        local hbX, hbY, hbW, hbH = opp:getWorldHitbox()
+        if umath.aabbIntersect(hbX, hbY, hbW, hbH, self:getWorldRect()) then
+            self.lastHitBy = opp.hitbox.id
+            return self.state:hit(opp.hitbox._type)
+        end
+    end
 end
 
 function PlayerClass:update()
+    self.time = self.time + 1
     self.state:update()
     self.posX = math.min(const.levelMaxX, math.max(const.levelMinX, self.posX))
-
-    local opp = self:getOpponent()
-    if opp.hitbox then
-        local hbX, hbY, hbW, hbH = opp:getWorldHitbox()
-        if umath.aabbIntersect(hbX, hbY, hbW, hbH, self:getWorldRect()) then
-            self.state:hit(opp.hitbox._type)
-        end
-    end
-
     self:updateDir()
 end
 

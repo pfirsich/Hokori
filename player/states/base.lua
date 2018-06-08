@@ -1,10 +1,11 @@
 local class = require("util.class")
+local scenes = require("scenes")
 
 local PlayerState = class("PlayerState")
 
 function PlayerState:initialize(player)
     self.player = player
-    self.start = now()
+    self.start = player.time
 end
 
 function PlayerState:enter()
@@ -17,7 +18,7 @@ function PlayerState:exit(newState)
 end
 
 function PlayerState:hit(_type)
-    self.player:die()
+    return _type ~= "normal"
 end
 
 return PlayerState

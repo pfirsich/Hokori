@@ -1,6 +1,7 @@
 local class = require("util.class")
 local const = require("const")
 local states = require("player.states.states")
+local sounds = require("sounds")
 
 local Strike = class("Strike", states.Base)
 
@@ -18,7 +19,7 @@ function Strike:update()
     local player = self.player
     local ctrl = player.controller
 
-    local dt = now() - self.start
+    local dt = player.time - self.start
     for _, anim in ipairs(const.strikeAnimTimes) do
         if dt > anim[2] then
             player:setSword(const.swordPositions.strike[anim[1]])
@@ -26,7 +27,10 @@ function Strike:update()
     end
 
     if dt >= const.strikeActive[1] and dt <= const.strikeActive[2] then
-        player:setHitbox(unpack(const.strikeHitbox))
+        if not player.hitbox then
+            sounds.strike:play()
+            player:setHitbox(const.strikeHitbox)
+        end
     else
         player:setHitbox()
     end

@@ -1,6 +1,8 @@
 local class = require("util.class")
 local const = require("const")
 local states = require("player.states.states")
+local sounds = require("sounds")
+local particles = require("particles")
 
 local Block = class("Block", states.Base)
 
@@ -55,9 +57,12 @@ end
 
 function Block:hit(_type)
     if _type == "strike" then
-        -- pass
+        for i = 1, const.blockParticleNum do
+            particles.block(self.player)
+        end
+        sounds.strikeBlock:play()
     else
-        states.Base.hit(self, _type)
+        return states.Base.hit(self, _type)
     end
 end
 

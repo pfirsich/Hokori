@@ -2,36 +2,53 @@
 lg = love.graphics
 lf = love.filesystem
 lm = love.math
+lk = love.keyboard
 inspect = require("libs.inspect")
 
 local input = require("input")
 local draw = require("draw")
 local players = require("player")
 local const = require("const")
-
-function love.load()
-    players[1] = players.Player(1, input.controllers[1], true)
-    players[2] = players.Player(2, input.controllers[2], false)
-
-    draw.init()
-end
+local scenes = require("scenes")
 
 local nextUpdate = 0
 local frameCounter = 0
-function love.update(dt)
+
+function now()
+    return frameCounter
+end
+
+function love.load()
+    draw.setWindowSize()
+
+    scenes.import()
+    for name, scene in pairs(scenes.list) do
+        scene.frameCounter = 0
+        if scene.load then
+            scene.load()
+        end
+    end
+
+    scenes.enter(scenes.game)
+end
+
+function love.update()
     if nextUpdate > love.timer.getTime() then
         return
     end
     nextUpdate = love.timer.getTime() + 1.0/const.simFps
 
-    input.update()
-    for _, player in ipairs(players) do
-        player:update()
-    end
-
     frameCounter = frameCounter + 1
+    scenes.current.frameCounter = scenes.current.frameCounter + 1
+    scenes.current.update()
 end
 
-function now()
-    return frameCounter
+function love.draw()
+    scenes.current.draw()
+end
+
+function love.keypressed(...)
+    if scenes.current.keypressed then
+        scenes.current.keypressed(...)
+    end
 end
