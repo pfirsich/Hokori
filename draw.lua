@@ -146,9 +146,13 @@ function love.draw()
 
     lg.setColor(0, 0, 0)
     lg.rectangle("fill", 0, 0, const.resX, const.topBarHeight)
+    lg.setColor(players[1].color)
+    lg.rectangle("fill", 1, 2, 2, 3)
+    lg.setColor(players[2].color)
+    lg.rectangle("fill", const.resX - 3, 2, 2, 3)
     lg.setColor(1, 1, 1)
-    lg.printf(tostring(players[1].score), 1, 1, const.resX - 2)
-    lg.printf(tostring(players[2].score), 1, 1, const.resX - 2, "right")
+    lg.printf(tostring(players[1].score), 4, 1, const.resX - 7)
+    lg.printf(tostring(players[2].score), 4, 1, const.resX - 7, "right")
 
     lg.setCanvas()
 
