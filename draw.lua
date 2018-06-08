@@ -70,10 +70,11 @@ function draw.init()
     end)
 end
 
-local function drawSwordLine(angle, length)
+local function drawSwordLine(angle, length, color)
     local x, y = math.cos(angle) * length, -math.sin(angle) * length
+    lg.setColor(0, 0, 0)
     lg.line(0, 0, x*const.swordHandlePortion, y*const.swordHandlePortion)
-    lg.setColor(1, 1, 1)
+    lg.setColor(color)
     lg.line(x*const.swordHandlePortion, y*const.swordHandlePortion, x, y)
 end
 
@@ -82,8 +83,7 @@ local function drawSword(player)
     lg.translate(player.posX, player.posY)
     lg.scale(player.forwardDir, 1)
     lg.translate(unpack(player.sword.offset))
-    lg.setColor(player.color[1] * 0.3, player.color[2] * 0.3, player.color[3] * 0.3)
-    drawSwordLine(player.sword.angle/180.0*math.pi, player.sword.length)
+    drawSwordLine(player.sword.angle/180.0*math.pi, player.sword.length, const.swordColors[player.id])
     lg.pop()
 end
 
@@ -136,12 +136,12 @@ function love.draw()
         lg.rectangle("fill", px, py, pw, ph)
         drawSword(player)
 
-        local hx, hy, hw, hh = player:getWorldHitbox()
-        if hx then
-            print(hx, hy, hw, hh)
-            lg.setColor(1, 0, 0, 0.4)
-            lg.rectangle("fill", hx, hy, hw, hh)
-        end
+        --local hx, hy, hw, hh = player:getWorldHitbox()
+        --if hx then
+        --    print(hx, hy, hw, hh)
+        --    lg.setColor(1, 0, 0, 0.4)
+        --    lg.rectangle("fill", hx, hy, hw, hh)
+        --end
     end
 
     lg.setColor(0, 0, 0)

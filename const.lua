@@ -25,19 +25,21 @@ local const = {
     levelMinX = 5,
     levelMaxX = 91,
 
-    walkForwardVel = 0.15,
-    walkBackwardVel = 0.12,
+    spawnEdgeDistance = 20,
 
-    dashInputWindow = 8,
-    dashFowardVel = 0.8,
-    dashBackwardVel = 0.8,
+    walkForwardVel = 0.24,
+    walkBackwardVel = 0.18,
+
+    dashInputWindow = 9,
+    dashFowardVel = 1.0,
+    dashBackwardVel = 1.0,
     dashDuration = 12,
     dashCancelAfter = 4,
 
-    tackleVel = 2.0,
-    tackleActive = {10, 18},
+    tackleVel = 2,
+    tackleActive = {9, 15},
     tackleHitbox = {"tackle", 0, -10, 7, 8},
-    tackleDuration = 18,
+    tackleDuration = 20,
     tackleDelay = 8,
 
     swordLength = 12,
@@ -56,10 +58,14 @@ local const = {
         },
         tackle = {-5, -4, -170},
     },
+    swordColors = {
+        {0.92, 1.0, 0.92},
+        {1.0, 0.92, 0.92},
+    },
 
     strikeDuration = 50,
     strikeActive = {12, 15},
-    strikeHitbox = {"strike", 0, -10, 19, 8},
+    strikeHitbox = {"strike", 0, -10, 18, 8},
     strikeAnimTimes = {
         {"startup1", 0},
         {"startup2", 8},

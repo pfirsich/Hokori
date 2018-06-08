@@ -20,17 +20,19 @@ function Tackle:update(dt)
     local player = self.player
     local ctrl = player.controller
 
-    if now() - self.start > const.tackleDelay then
+    local dt = now() - self.start
+
+    if dt > const.tackleDelay and dt <= const.tackleActive[2] then
         player.posX = player.posX + self.velocity
     end
 
-    if now() - self.start >= const.tackleActive[1] and now() - self.start <= const.tackleActive[2] then
+    if dt >= const.tackleActive[1] and dt <= const.tackleActive[2] then
         player:setHitbox(unpack(const.tackleHitbox))
     else
         player:setHitbox()
     end
 
-    if now() - self.start > const.tackleDuration then
+    if dt > const.tackleDuration then
         player:exitState()
         return
     end

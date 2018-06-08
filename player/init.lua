@@ -16,7 +16,7 @@ function PlayerClass:initialize(playerId, controller, leftSide)
 
     self.score = 0
     self.posY = const.resY - 2
-    self.spawnPosX = ({30, const.resX - 30})[self.id]
+    self.spawnPosX = ({const.spawnEdgeDistance, const.resX - const.spawnEdgeDistance})[self.id]
     self.color = const.playerColors[self.id]
 
     self.posX = self.spawnPosX
