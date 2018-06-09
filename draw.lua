@@ -18,8 +18,15 @@ canvas:setFilter(const.renderFilter, const.renderFilter)
 local backgroundElements = {}
 
 function draw.setWindowSize()
+    local desktopW, desktopH = love.window.getDesktopDimensions()
+    if const.renderScale == "auto" then
+        const.renderScale = math.min(desktopW / const.resX, desktopH / const.resY)
+    end
+
     local w, h, flags = love.window.getMode()
-    love.window.setMode(const.resX * const.renderScale, const.resY * const.renderScale, flags)
+    local w, h = const.resX * const.renderScale, const.resY * const.renderScale
+    love.window.setMode(w, h, flags)
+    love.window.setPosition((desktopW - w)/2, (desktopH - h)/2)
 end
 
 local function lerp(a, b, t)
