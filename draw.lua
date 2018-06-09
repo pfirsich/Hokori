@@ -22,6 +22,7 @@ local backgroundElements = {}
 local blinkTimers = {0, 0}
 
 local time = love.timer.getTime()
+local dt = 0 -- set by draw.init
 
 local lerp = umath.lerp
 local randf = umath.randf
@@ -140,12 +141,6 @@ function draw.blinkScore(playerId)
 end
 
 function draw.game()
-    local dt = love.timer.getTime() - time
-    time = love.timer.getTime()
-
-    lg.setCanvas(canvas)
-    lg.clear()
-
     drawBackground(dt)
 
     for _, player in ipairs(players) do
@@ -187,7 +182,24 @@ function draw.game()
     lg.printf(tostring(players[1].score), scoreFromX, 1, scoreToX)
     lg.setColor(getScoreBlinkColor(2))
     lg.printf(tostring(players[2].score), scoreFromX, 1, scoreToX, "right")
+end
 
+function draw.help()
+    lg.setColor(0, 0, 0, const.helpOverlayAlpha)
+    lg.rectangle("fill", 0, 0, const.resX, const.resY)
+    lg.setColor(1, 1, 1)
+    lg.printf(const.helpText, 0, const.helpOffsetY, const.resX, "center")
+end
+
+function draw.start()
+    dt = love.timer.getTime() - time
+    time = love.timer.getTime()
+
+    lg.setCanvas(canvas)
+    lg.clear()
+end
+
+function draw.finalize()
     lg.setCanvas()
 
     if env.FLASCHENTASCHEN then

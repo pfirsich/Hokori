@@ -101,6 +101,16 @@ local const = {
     scoreBlinkFrequency = 3.0,
 
     blockParticleNum = 50,
+
+    helpOverlayAlpha = 0.8,
+    helpOffsetY = 7,
+    helpText = {
+        {1, 1, 1}, "DOUBLE TAP TO DASH\n",
+        {1, 1, 1}, "HOLD BACK TO ", {0, 0, 1}, "BLOCK\n\n",
+        {1, 0, 0}, "STRIKE", {0.8, 0.8, 0.8}, " BEATS ", {0, 1, 0}, "TACKLE\n",
+        {0, 1, 0}, "TACKLE", {0.8, 0.8, 0.8}, " BEATS ", {0, 0, 1}, "BLOCK\n",
+        {0, 0, 1}, "BLOCK", {0.8, 0.8, 0.8}, " BEATS ", {1, 0, 0}, "STRIKE\n",
+    }
 }
 
 return const

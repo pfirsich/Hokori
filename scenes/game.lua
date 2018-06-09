@@ -95,7 +95,12 @@ function scene.update()
 end
 
 function scene.draw()
+    draw.start()
     draw.game()
+    if lk.isDown("return") or lk.isDown("f1") then
+        draw.help()
+    end
+    draw.finalize()
 end
 
 function scene.keypressed(key)
