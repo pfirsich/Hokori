@@ -76,7 +76,7 @@ local const = {
         {"recovery", 30},
     },
 
-    deathFreezeDuration = 40,
+    deathFreezeDuration = 20,
     deathDuration = 160,
 
     scoreBlinkDuration = 3.0,
