@@ -15,7 +15,7 @@ local function dtMultiply(factor, dt)
 end
 
 local function updatePlayerExplosionParticle(self, dt)
-    local maxAge = 8.0
+    local maxAge = 6.0
     self.age = self.age + dt
 
     local decolorTime = 2.0
@@ -26,12 +26,12 @@ local function updatePlayerExplosionParticle(self, dt)
         end
     else
         self.color[4] = 1.0 - (self.age - decolorTime) / (maxAge - decolorTime)
-    end
 
-    local gravAngle = math.pi*0.75 + math.pi*0.1*randf(-1, 1)
-    local gravSpeed = 2
-    self.x = self.x + math.cos(gravAngle) * gravSpeed * dt
-    self.y = self.y + math.sin(gravAngle) * gravSpeed * dt
+        local gravAngle = math.pi*0.75 + math.pi*0.1*randf(-1, 1)
+        local gravSpeed = 2
+        self.x = self.x + math.cos(gravAngle) * gravSpeed * dt
+        self.y = self.y + math.sin(gravAngle) * gravSpeed * dt
+    end
 
     local factor = dtMultiply(0.3, dt)
     self.vx = self.vx * factor
@@ -97,8 +97,11 @@ end
 
 function particles.update(dt)
     local remove = {}
-    for i, part in ipairs(particles) do
-        remove[i] = part:update(dt)
+    for i = #particles, 1, -1 do
+        local part = particles[i]
+        if part:update(dt) then
+            table.remove(particles, i)
+        end
         part.x = part.x + part.vx * dt
         part.y = part.y + part.vy * dt
     end
