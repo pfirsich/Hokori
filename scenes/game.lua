@@ -99,6 +99,12 @@ function scene.keypressed(key)
     if key == "h" and ctrl then
         draw.debug = not draw.debug
     end
+    if key == "f5" then
+        for _, player in ipairs(players) do
+            player.score = 0
+            player:respawn()
+        end
+    end
 end
 
 function scene.exit()
