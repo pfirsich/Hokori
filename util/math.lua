@@ -6,28 +6,31 @@ function umath.aabbIntersect(ax, ay, aw, ah, bx, by, bw, bh)
     return not (bx >= ax + aw or bx + bw <= ax or by >= ay + ah or by + bh <= ay)
 end
 
--- returns mtv for a
--- only call this is there is an intersection
-function umath.aabbMtv(ax, ay, aw, ah, bx, by, bw, bh)
-    local mtvX, mtvY = 0, 0
+function umath.lerp(a, b, t)
+    return (1 - t) * a + t * b
+end
 
-    if ax < bx then
-        mtvX = bx - (ax + aw)
-    else
-        mtvX = (bx + bw) - ax
-    end
+function umath.randf(a, b)
+    return umath.lerp(a, b, lm.random())
+end
 
-    if ay < by then
-        mtvY = by - (ay + ah)
-    else
-        mtvY = (by + bh) - ay
-    end
+function umath.deg2rad(deg)
+    return deg / 180.0 * math.pi
+end
 
-    if math.abs(mtvX) < math.abs(mtvY) then
-       return mtvX, 0
-    else
-       return 0, mtvY
+-- if you want to multiply a number in a loop, you have to adjust that multiplication
+-- for delta time too.
+-- Addition is simpler (just multiply with dt), for multiplication you have to use this
+function umath.dtMultiply(factor, dt)
+    return math.exp(math.log(factor) * dt)
+end
+
+function umath.mulList(list, factor)
+    local ret = {}
+    for i, v in ipairs(list) do
+        ret[i] = v * factor
     end
+    return ret
 end
 
 return umath

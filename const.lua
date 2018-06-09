@@ -1,11 +1,4 @@
-local function mulList(list, factor)
-    local ret = {}
-    for i, v in ipairs(list) do
-        ret[i] = v * factor
-    end
-    return ret
-end
-
+local umath = require("util.math")
 
 local const = {
     simFps = 60,
@@ -14,13 +7,38 @@ local const = {
     renderScale = "auto",
     renderFilter = "nearest",
     msaa = 16,
+
+    horizonHeight = 25,
+    treeCount = 20,
+    dustCount = 80,
+    minZ = 0.1,
+    treeColRange = {0.2, 0.7},
+    dustColRange = {0.3, 0.8},
+    treeWidthRange = {8, 20},
+    treeMaxDepth = 4,
+    skyColor = {0.7, 0.7, 0.7},
+    groundColRange = {0.6, 0.1},
+    dustMoveAngle = 135,
+    dustAngleDelta = 18,
+    dustFrontSpeed = 2,
+    dustMaxDepth = 4,
+
+    hitboxColors = {
+        default = {1, 1, 0, 0.4},
+        normal = {0, 0, 1, 0.4},
+    },
+
     topBarHeight = 7,
+    colorIconEdgeSpacing = 1,
+    colorIconWidth = 2,
+    colorIconHeight = 3,
+    scoreIconSpacing = 1,
 
     playerWidth = 8,
     playerHeight = 12,
     playerColors = {
-        mulList({0, 1, 0}, 0.6),
-        mulList({1, 0.12549, 0.52941}, 0.6),
+        umath.mulList({0, 1, 0}, 0.6),
+        umath.mulList({1, 0.12549, 0.52941}, 0.6),
     },
     levelMinX = 5,
     levelMaxX = 91,

@@ -4,22 +4,23 @@ local input = {}
 
 local inputNames = {"up", "down", "left", "right", "action1", "action2"}
 
-local keyboardControls = {
-    {"w", "s", "a", "d", "f", "g"},
-    {"up", "down", "left", "right", "end", "pagedown"},
+-- inputs are in the order of inputNames
+local controlSets = {
+    keyboard = {
+        {"w", "s", "a", "d", "f", "g"},
+        {"up", "down", "left", "right", "end", "pagedown"},
+    },
+    stab = {
+        {"pagedown", "f11", "end", "f12", "f10", "8"},
+        {"9", "1", "0", "7", "3", "4"},
+    },
+    gamepad = {
+        gamepad = true,
+        "dpup", "dpdown", "dpleft", "dpright", "a", "b",
+    }
 }
 
-local stabControls = {
-    {"pagedown", "f11", "end", "f12", "f10", "8"},
-    {"9", "1", "0", "7", "3", "4"},
-}
-
-local gamepadControls = {
-    gamepad = true,
-    "dpup", "dpdown", "dpleft", "dpright", "a", "b",
-}
-
-local controlSet = keyboardControls -- change this to change controls!
+local controlSet = controlSets.keyboard
 
 local function inputStateFunction(player, inputIndex)
     if controlSet.gamepad then

@@ -12,8 +12,8 @@ local deathStart = nil
 local deathFreeze = false
 
 function scene.enter(mapFileName, _client)
-    players[1] = players.Player(1, input.controllers[1], true)
-    players[2] = players.Player(2, input.controllers[2], false)
+    players[1] = players.Player(1)
+    players[2] = players.Player(2)
     draw.initGame()
 end
 
@@ -35,10 +35,44 @@ local function explodePlayers()
             for y = 1, const.playerHeight do
                 for x = 1, const.playerWidth do
                     particles.playerExplosion(player.id,
-                        player.posX - const.playerWidth/2 + x,
-                        player.posY - const.playerHeight + y)
+                        player.posX - const.playerWidth/2 + x - 1,
+                        player.posY - const.playerHeight + y - 1)
                 end
             end
+        end
+    end
+end
+
+local function updateGame()
+    input.update()
+    for _, player in ipairs(players) do
+        if not player.dead then
+            player:update()
+        end
+    end
+
+    local hitPlayers = {}
+    for _, player in ipairs(players) do
+        if player:checkHit() then
+            table.insert(hitPlayers, player)
+        end
+    end
+
+    if #hitPlayers > 0 then
+        deathStart = now()
+        deathFreeze = true
+
+        -- both players killed each other simultaneously
+        if #hitPlayers == 2 then
+            for i = 1, 2 do
+                playerDeath(hitPlayers[i])
+                playerScore(hitPlayers[i])
+            end
+        elseif #hitPlayers == 1 then
+            local deadPlayer = hitPlayers[1]
+            local opponent = deadPlayer:getOpponent()
+            playerDeath(deadPlayer)
+            playerScore(opponent)
         end
     end
 end
@@ -50,37 +84,7 @@ function scene.update()
             explodePlayers()
         end
     else
-        input.update()
-        for _, player in ipairs(players) do
-            if not player.dead then
-                player:update()
-            end
-        end
-
-        local hitPlayers = {}
-        for _, player in ipairs(players) do
-            if player:checkHit() then
-                table.insert(hitPlayers, player)
-            end
-        end
-
-        if #hitPlayers > 0 then
-            deathStart = now()
-            deathFreeze = true
-
-            -- both players killed each other simultaneously
-            if #hitPlayers == 2 then
-                for i = 1, 2 do
-                    playerDeath(hitPlayers[i])
-                    playerScore(hitPlayers[i])
-                end
-            elseif #hitPlayers == 1 then
-                local deadPlayer = hitPlayers[1]
-                local opponent = deadPlayer:getOpponent()
-                playerDeath(deadPlayer)
-                playerScore(opponent)
-            end
-        end
+        updateGame()
     end
 
     if deathStart and now() - deathStart > const.deathDuration then
