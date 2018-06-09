@@ -47,11 +47,7 @@ function Block:update(dt)
         self.player:setSword(const.swordPositions.blockLow)
     else
         player.posX = player.posX + player.backwardDir * const.walkBackwardVel
-        if ctrl.up.state then
-            self.player:setSword(const.swordPositions.blockHigh)
-        else
-            self.player:setSword(const.swordPositions.block)
-        end
+        self.player:setSword(const.swordPositions.block)
     end
 end
 
