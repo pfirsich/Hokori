@@ -1,4 +1,5 @@
 local const = require("const")
+local env = require("environment")
 
 local input = {}
 
@@ -20,7 +21,7 @@ local controlSets = {
     }
 }
 
-local controlSet = controlSets.keyboard
+local controlSet = controlSets[env.CONTROL_SET]
 
 local function inputStateFunction(player, inputIndex)
     if controlSet.gamepad then

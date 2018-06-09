@@ -1,3 +1,6 @@
+local flaschentaschen = require("libs.flaschentaschen")
+
+local env = require("environment")
 local const = require("const")
 local players = require("player")
 local particles = require("particles")
@@ -186,6 +189,10 @@ function draw.game()
     lg.printf(tostring(players[2].score), scoreFromX, 1, scoreToX, "right")
 
     lg.setCanvas()
+
+    if env.FLASCHENTASCHEN then
+        flaschentaschen.sendCanvas(canvas)
+    end
 
     -- draw to screen
     lg.push()

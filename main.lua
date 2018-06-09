@@ -5,6 +5,9 @@ lm = love.math
 lk = love.keyboard
 inspect = require("libs.inspect")
 
+local flaschentaschen = require("libs.flaschentaschen")
+
+local env = require("environment")
 local input = require("input")
 local draw = require("draw")
 local players = require("player")
@@ -20,6 +23,10 @@ end
 
 function love.load()
     draw.setWindowSize()
+
+    if env.FLASCHENTASCHEN then
+        flaschentaschen.initialize(const.resX * const.resY, env.FT_IP, env.FT_PORT)
+    end
 
     scenes.import()
     for name, scene in pairs(scenes.list) do
