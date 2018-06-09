@@ -1,7 +1,7 @@
 
 
 function love.conf(t)
-    t.identity = "stabgame"                    -- The name of the save directory (string)
+    t.identity = "Hokori"                    -- The name of the save directory (string)
     t.appendidentity = false            -- Search files in source directory before save directory (boolean)
     t.version = "11.0"                  -- The LÖVE version this game was made for (string)
     t.console = true                   -- Attach a console (boolean, Windows only)
@@ -11,7 +11,7 @@ function love.conf(t)
 
     t.audio.mixwithsystem = true        -- Keep background music playing when opening LOVE (boolean, iOS and Android only)
 
-    t.window.title = "stabgame"         -- The window title (string)
+    t.window.title = "Hokori"         -- The window title (string)
     t.window.icon = nil                 -- Filepath to an image to use as the window's icon (string)
     t.window.width = 800                -- The window width (number)
     t.window.height = 600               -- The window height (number)
