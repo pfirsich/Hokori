@@ -3,18 +3,18 @@ lg = love.graphics
 lf = love.filesystem
 lm = love.math
 lk = love.keyboard
+ld = love.data
 inspect = require("libs.inspect")
 
 local flaschentaschen = require("libs.flaschentaschen")
 
 local env = require("environment")
-local input = require("input")
 local draw = require("draw")
 local players = require("player")
 local const = require("const")
 local scenes = require("scenes")
 
-local nextUpdate = 0
+local nextUpdate = -1
 local frameCounter = 0
 
 function now()
@@ -23,6 +23,7 @@ end
 
 function love.load()
     draw.setWindowSize()
+    draw.initBackground()
 
     if env.FLASCHENTASCHEN then
         flaschentaschen.initialize(const.resX * const.resY, env.FT_IP, env.FT_PORT)
@@ -36,7 +37,7 @@ function love.load()
         end
     end
 
-    scenes.enter(scenes.game)
+    scenes.enter(scenes[env.ENTRY_SCENE])
 end
 
 function love.update()
@@ -47,11 +48,15 @@ function love.update()
 
     frameCounter = frameCounter + 1
     scenes.current.frameCounter = scenes.current.frameCounter + 1
-    scenes.current.update()
+    if scenes.current.update then
+        scenes.current.update()
+    end
 end
 
 function love.draw()
-    scenes.current.draw()
+    if scenes.current.draw then
+        scenes.current.draw()
+    end
 end
 
 function love.keypressed(...)

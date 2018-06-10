@@ -24,27 +24,27 @@ function Normal:update()
     -- re-set the hitbox every frame, so id is renewed
     self.player:setHitbox(const.normalHitbox)
 
-    if ctrl.forward.state then
+    if ctrl.forward:down() then
         player.posX = player.posX + player.forwardDir * const.walkForwardVel
     end
 
-    if ctrl.action1:inHistory("pressed", const.attackBufferFrames) then
+    if ctrl.action1:pressed(const.attackBufferFrames) then
         player:setState(states.Strike)
         return
     end
 
-    if ctrl.action2:inHistory("pressed", const.attackBufferFrames) then
+    if ctrl.action2:pressed(const.attackBufferFrames) then
         player:setState(states.Tackle)
         return
     end
 
-    if ctrl.forward.pressed and ctrl.forward:inHistory("pressed", const.dashInputWindow) then
+    if ctrl.forward:pressed() and ctrl.forward:pressed(const.dashInputWindow) then
         player:setState(states.Dash, true)
         return
     end
 
-    if ctrl.backward.pressed and ctrl.backward:inHistory("pressed", const.dashInputWindow) and
-            not ctrl.forward.state then
+    if ctrl.backward:pressed() and ctrl.backward:pressed(const.dashInputWindow) and
+            not ctrl.forward:down() then
         player:setState(states.Dash, false)
         return
     end

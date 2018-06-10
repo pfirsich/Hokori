@@ -11,7 +11,7 @@ function Block:initialize(player, ...)
 end
 
 function Block.tryEnter(player)
-    if player.controller.backward.state and not player.controller.forward.state then
+    if player.controller.backward:down() and not player.controller.forward:down() then
         player:setState(states.Block)
         return true
     end
@@ -24,26 +24,26 @@ end
 function Block:exit(newState)
 end
 
-function Block:update(dt)
+function Block:update()
     local player = self.player
     local ctrl = player.controller
 
-    if not ctrl.backward.state or ctrl.forward.state then
+    if not ctrl.backward:down() or ctrl.forward:down() then
         player:setState(states.Normal)
         return
     end
 
-    if ctrl.action1.pressed then
+    if ctrl.action1:pressed() then
         player:setState(states.Strike)
         return
     end
 
-    if ctrl.action2.pressed then
+    if ctrl.action2:pressed() then
         player:setState(states.Tackle)
         return
     end
 
-    if ctrl.down.state and not ctrl.up.state then
+    if ctrl.down:down() and not ctrl.up:down() then
         self.player:setSword(const.swordPositions.blockLow)
     else
         player.posX = player.posX + player.backwardDir * const.walkBackwardVel

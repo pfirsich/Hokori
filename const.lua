@@ -34,6 +34,30 @@ local const = {
     colorIconHeight = 3,
     scoreIconSpacing = 1,
 
+    controlSets = {
+        keyboard = {
+            {
+                up = "w", down = "s", left = "a", right = "d",
+                action1 = "f", action2 = "g"
+            },
+            {
+                up = "up", down = "down", left = "left", right = "right",
+                action1 = "end", action2 = "pagedown"
+            },
+        },
+        stab = {
+            {
+                up = "pagedown", down = "f11", left = "end", right = "f12",
+                action1 = "f10", action2 = "8"
+            },
+            {
+                up = "9", down = "1", left = "0", right = "7",
+                action1 = "3", action2 = "4"
+            },
+        },
+    },
+
+
     playerWidth = 8,
     playerHeight = 12,
     playerColors = {
@@ -45,7 +69,7 @@ local const = {
 
     spawnEdgeDistance = 20,
 
-    attackBufferFrames = 8,
+    attackBufferFrames = 7,
 
     walkForwardVel = 0.24,
     walkBackwardVel = 0.18,
@@ -110,7 +134,15 @@ local const = {
         {1, 0, 0}, "STRIKE", {0.8, 0.8, 0.8}, " BEATS ", {0, 1, 0}, "TACKLE\n",
         {0, 1, 0}, "TACKLE", {0.8, 0.8, 0.8}, " BEATS ", {0, 0, 1}, "BLOCK\n",
         {0, 0, 1}, "BLOCK", {0.8, 0.8, 0.8}, " BEATS ", {1, 0, 0}, "STRIKE\n",
-    }
+    },
+
+    defaultPort = 4574,
+    -- this is pretty much the low end of the maximum acceptable ping
+    defaultRtt = 120,
+    minInputDelay = 2,
+    inputBufferLength = 40, -- frames
+    maxSavedPlayerStates = 40,
+    numNetUpdateInputFrames = 15,
 }
 
 return const

@@ -4,6 +4,7 @@ local env = require("environment")
 local const = require("const")
 local players = require("player")
 local particles = require("particles")
+local scenes = require("scenes")
 local umath = require("util.math")
 
 local draw = {}
@@ -49,39 +50,6 @@ local function drawSword(player)
     lg.pop()
 end
 
-local function drawBackground(dt)
-    lg.setColor(const.skyColor)
-    lg.rectangle("fill", 0, 0, const.resX, const.horizonHeight)
-
-    local fromY, toY = const.horizonHeight, const.resY
-    for y = fromY, toY do
-        local c = lerp(const.groundColRange[1], const.groundColRange[2],
-            (y - fromY) / (toY - fromY))
-        lg.setColor(c, c, c)
-        lg.line(0, y, const.resX, y)
-    end
-
-    for _, bgElem in ipairs(backgroundElements) do
-        lg.setColor(bgElem.color, bgElem.color, bgElem.color)
-        if bgElem._type == "tree" then
-            lg.rectangle("fill", bgElem.x, 0, bgElem.width, bgElem.y)
-        elseif bgElem._type == "dust" then
-            -- update dust
-            local angle = deg2rad(const.dustMoveAngle) + deg2rad(const.dustAngleDelta)*randf(-1, 1)
-            local speed = const.dustFrontSpeed / lerp(1, const.dustMaxDepth, bgElem.z)
-            local vX, vY = math.cos(angle) * speed, math.sin(angle) * speed
-            bgElem.x = bgElem.x + vX * dt
-            bgElem.y = bgElem.y + vY * dt
-            if bgElem.y > groundHeightAtDepth(bgElem.z) then
-                bgElem.x = lm.random(0, const.resX)
-                bgElem.y = 0
-            end
-            -- draw
-            lg.rectangle("fill", bgElem.x, bgElem.y, 1, 1)
-        end
-    end
-end
-
 local function getScoreBlinkColor(playerId)
     local dt = love.timer.getTime() - blinkTimers[playerId]
     local a = 1
@@ -104,7 +72,7 @@ function draw.setWindowSize()
     love.window.setPosition((desktopW - w)/2, (desktopH - h)/2)
 end
 
-function draw.initGame()
+function draw.initBackground()
     -- inspired by this: https://urbanfragment.files.wordpress.com/2012/10/the-sword-of-doom-samurai-cinema.jpg
     for i = 1, const.treeCount do
         local zFactor = randf(const.minZ, 1)
@@ -140,8 +108,41 @@ function draw.blinkScore(playerId)
     blinkTimers[playerId] = love.timer.getTime()
 end
 
+function draw.background()
+    lg.setColor(const.skyColor)
+    lg.rectangle("fill", 0, 0, const.resX, const.horizonHeight)
+
+    local fromY, toY = const.horizonHeight, const.resY
+    for y = fromY, toY do
+        local c = lerp(const.groundColRange[1], const.groundColRange[2],
+            (y - fromY) / (toY - fromY))
+        lg.setColor(c, c, c)
+        lg.line(0, y, const.resX, y)
+    end
+
+    for _, bgElem in ipairs(backgroundElements) do
+        lg.setColor(bgElem.color, bgElem.color, bgElem.color)
+        if bgElem._type == "tree" then
+            lg.rectangle("fill", bgElem.x, 0, bgElem.width, bgElem.y)
+        elseif bgElem._type == "dust" then
+            -- update dust
+            local angle = deg2rad(const.dustMoveAngle) + deg2rad(const.dustAngleDelta)*randf(-1, 1)
+            local speed = const.dustFrontSpeed / lerp(1, const.dustMaxDepth, bgElem.z)
+            local vX, vY = math.cos(angle) * speed, math.sin(angle) * speed
+            bgElem.x = bgElem.x + vX * dt
+            bgElem.y = bgElem.y + vY * dt
+            if bgElem.y > groundHeightAtDepth(bgElem.z) then
+                bgElem.x = lm.random(0, const.resX)
+                bgElem.y = 0
+            end
+            -- draw
+            lg.rectangle("fill", bgElem.x, bgElem.y, 1, 1)
+        end
+    end
+end
+
 function draw.game()
-    drawBackground(dt)
+    draw.background()
 
     for _, player in ipairs(players) do
         if player.visible then
@@ -182,6 +183,10 @@ function draw.game()
     lg.printf(tostring(players[1].score), scoreFromX, 1, scoreToX)
     lg.setColor(getScoreBlinkColor(2))
     lg.printf(tostring(players[2].score), scoreFromX, 1, scoreToX, "right")
+
+    if scenes.current.message then
+        lg.printf(scenes.current.message, 0, const.topBarHeight + 1, const.resX, "center")
+    end
 end
 
 function draw.help()
@@ -189,6 +194,19 @@ function draw.help()
     lg.rectangle("fill", 0, 0, const.resX, const.resY)
     lg.setColor(1, 1, 1)
     lg.printf(const.helpText, 0, const.helpOffsetY, const.resX, "center")
+end
+
+function draw.menuBase(noTitle)
+    draw.background()
+    lg.setColor(0, 0, 0, 0.5)
+    lg.rectangle("fill", 0, 0, const.resX, const.resY)
+
+    if not noTitle then
+        local c = math.cos(love.timer.getTime() * 2 * math.pi * 0.2) * 0.5 + 0.5
+        c = c * 0.15 + 0.85
+        lg.setColor(c, c, c)
+        lg.printf("HOKORI", 0, 2, const.resX, "center")
+    end
 end
 
 function draw.start()

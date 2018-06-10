@@ -4,6 +4,7 @@ scenes.current = nil
 scenes.list = {}
 
 function scenes.enter(scene, ...)
+    assert(scene, "Scene does not exist")
     if scenes.current then
         if scenes.current.exit then
             scenes.current.exit(scene)

@@ -3,11 +3,14 @@
 -- => input.lua defines keys for control sets
 
 local env = {
-    FLASCHENTASCHEN = false,
+    STAB_MODE = false,
+
     FT_IP = "localhost",
     FT_PORT = 1337,
-    CONTROL_SET = "keyboard",
-    --CONTROL_SET = "stab",
 }
+
+env.FLASCHENTASCHEN = env.STAB_MODE
+env.CONTROL_SET = env.STAB_MODE and "stab" or "keyboard"
+env.ENTRY_SCENE = env.STAB_MODE and "localMultiplayer" or "mainmenu"
 
 return env

@@ -10,13 +10,18 @@ local function src(file, volume, usage)
     return src
 end
 
-sounds.dash = src("dash.wav", 0.15)
-sounds.strike  = src("strike.wav")
-sounds.tackle = src("tackle.wav")
-sounds.strikeBlock = src("strikeBlock.wav", 0.3)
---sounds.strikeHit = src("strikeHit.wav")
---sounds.tackleHit = src("tackleHit.wav")
-sounds.die = src("die.wav")
+local function prepare(name, ...)
+    sounds[name] = src(name .. ".wav", ...)
+end
+
+prepare("dash", 0.15)
+prepare("strike")
+prepare("tackle")
+prepare("strikeBlock", 0.3)
+--prepare("strikeHit")
+--prepare("tackleHit")
+prepare("die")
+prepare("menu")
 
 sounds.music = src("music.ogg", 0.05, "stream")
 sounds.music:setLooping(true)

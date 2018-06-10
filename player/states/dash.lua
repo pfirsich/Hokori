@@ -25,7 +25,7 @@ function Dash:update(dt)
 
     player.posX = player.posX + self.velocity
 
-    if (player.time - self.start > const.dashCancelAfter and ctrl.down.pressed) or
+    if (player.time - self.start > const.dashCancelAfter and ctrl.down:pressed()) or
             player.time - self.start >= const.dashDuration then
         if self.forward then
             -- if you forward dash and hold block immediately, you will go into Normal for one frame

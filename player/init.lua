@@ -1,30 +1,87 @@
 local const = require("const")
 local class = require("util.class")
 local umath = require("util.math")
-local input = require("input")
 local sounds = require("sounds")
 local states_ = require("player.states")
 local states = require("player.states.states")
 
 local players = {}
 
+-- assuming I lose all information about the simulation (including past inputs),
+-- this function returns everything I need to have the same (next) simulation step
+-- give exactly the same results as if I didn't lose it.
+local PlayerState = class("PlayerState")
+players.PlayerState = PlayerState
+
+PlayerState.format = "<I2I4 BdI4I4 B"
+
+function PlayerState.deserialize(str)
+    local values = {ld.unpack(PlayerState.format, str)}
+    return PlayerState{
+        score = values[1],
+        time = values[2],
+        visible = values[3] > 0,
+        posX = values[4],
+        hitboxCounter = values[5],
+        lastHitBy = values[6],
+        state = {id = values[7]},
+    }
+end
+
+function PlayerState:initialize(player)
+    self.score = player.score
+    self.time = player.time
+    self.visible = player.visible
+    self.posX = player.posX
+    self.hitboxCounter = player.hitboxCounter
+    self.lastHitBy = player.lastHitBy
+    self.stateId = player.state.id -- TODO: more state serialization
+
+    -- After this class is constructed, it remains constant, so we can cache these!
+    self.serialization = nil
+    self.hash = nil
+end
+
+function PlayerState:serialize()
+    if not self.serialization then
+        self.serialization = ld.pack("string", self.format, self.score, self.time,
+            self.visible and 1 or 0, self.posX, self.hitboxCounter, self.lastHitBy,
+            self.stateId)
+    end
+    return self.serialization
+end
+
+function PlayerState:getHash()
+    if not self.hash then
+        self.hash = ld.hash("md5", self:serialize())
+    end
+    return self.hash
+end
+
+function PlayerState:__tostring()
+    return ("score: %d, time: %d, v: %s, pos: %f, hbC: %d, lHb: %d, state: %d"):format(
+        self.score, self.time, tostring(self.visible), self.posX, self.hitboxCounter,
+        self.lastHitBy, self.stateId)
+end
+
 local PlayerClass = class("Player")
 players.Player = PlayerClass
 
-function PlayerClass:initialize(playerId, leftSide)
+function PlayerClass:initialize(playerId, spawnPos)
+    -- fixed from the start
     self.id = playerId
-    self.controller = input.controllers[self.id]
 
-    self.visible = true
-    self.dead = false
-    self.time = 0
-    self.score = 0
     self.posY = const.resY - 2
-    self.spawnPosX = ({const.spawnEdgeDistance, const.resX - const.spawnEdgeDistance})[self.id]
+    self.spawnPosX = spawnPos
     self.color = const.playerColors[self.id]
 
+    -- everything below here changes
+    self.score = 0
+    self.time = 0
+    self.visible = true
+
     self.posX = self.spawnPosX
-    self:setDir(leftSide)
+    self:setDir(spawnPos < const.resX / 2)
     self.sword = {
         offset = {0, 0},
         angle = 0,
@@ -34,6 +91,29 @@ function PlayerClass:initialize(playerId, leftSide)
     self.hitboxCounter = 0
     self.lastHitBy = -1
     self:setState(states.Normal)
+end
+
+function PlayerClass:setState(stateClass, ...)
+    local state = stateClass(self)
+    if self.state then
+        self.state:exit(state)
+    end
+    self.state = state
+    self.state:enter(...)
+end
+
+function PlayerClass:updateDir()
+    local opp = self:getOpponent()
+    self:setDir(self.posX < opp.posX)
+end
+
+function PlayerClass:setDir(leftSide)
+    self.forwardDir = leftSide and 1 or -1
+    self.backwardDir = -self.forwardDir
+end
+
+function PlayerClass:fullState()
+    return PlayerState(self)
 end
 
 function PlayerClass:setHitbox(hitbox)
@@ -57,32 +137,6 @@ function PlayerClass:getWorldHitbox()
             x = -(x + w)
         end
         return x + self.posX, y + self.posY, w, h
-    end
-end
-
-function PlayerClass:setState(stateClass, ...)
-    local state = stateClass(self)
-    if self.state then
-        self.state:exit(state)
-    end
-    self.state = state
-    self.state:enter(...)
-end
-
-function PlayerClass:updateDir()
-    local opp = self:getOpponent()
-    self:setDir(self.posX < opp.posX)
-end
-
-function PlayerClass:setDir(leftSide)
-    self.forwardDir = leftSide and 1 or -1
-    self.backwardDir = -self.forwardDir
-    if leftSide then
-        self.controller.forward = self.controller.right
-        self.controller.backward = self.controller.left
-    else
-        self.controller.forward = self.controller.left
-        self.controller.backward = self.controller.right
     end
 end
 
@@ -112,23 +166,14 @@ end
 
 function PlayerClass:respawn()
     self.posX = self.spawnPosX
-    self.controller = input.controllers[self.id]
     self:updateDir()
     self.hitbox = nil
     self:setState(states.Normal)
     self.visible = true
-    self.dead = false
 end
 
 function PlayerClass:die()
-    self:uncontrol()
     self:setState(states.Dead)
-    self.dead = true
-end
-
-function PlayerClass:uncontrol()
-    self.controller = input.dummyController
-    self:updateDir() -- to prepare the dummy controller
 end
 
 function PlayerClass:checkHit()
@@ -142,8 +187,18 @@ function PlayerClass:checkHit()
     end
 end
 
-function PlayerClass:update()
+function PlayerClass:update(inputState)
     self.time = self.time + 1
+
+    if self.forwardDir > 0 then
+        inputState.forward = inputState.right
+        inputState.backward = inputState.left
+    else
+        inputState.forward = inputState.left
+        inputState.backward = inputState.right
+    end
+    self.controller = inputState
+
     self.state:update()
     self.posX = math.min(const.levelMaxX, math.max(const.levelMinX, self.posX))
     self:updateDir()
