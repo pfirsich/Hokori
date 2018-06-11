@@ -29,7 +29,6 @@ messageHandlers[messages.clientHello.id] = function(message, event)
     else
         -- TODO: Check version
         clientPeer = event.peer
-        clientPeer:round_trip_time(const.defaultRtt)
         net.send(messages.hostHello, {success = 1, reason = 0})
         net.connected = true
     end
@@ -85,6 +84,7 @@ function net.getMessage()
 
         if event.type == "connect" then
             if net.hosting then
+                event.peer:round_trip_time(const.defaultRtt)
                 -- do nothing yet, wait for messages.clientHello
             else
                 -- TODO: version
