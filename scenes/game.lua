@@ -100,7 +100,7 @@ local function updateGame(frame)
     lastUpdateFrame = frame
 
     if deathFreeze then
-        if now() - deathStart > const.deathFreezeDuration then
+        if frame - deathStart > const.deathFreezeDuration then
             deathFreeze = false
             explodeDeadPlayers()
         end
@@ -118,7 +118,7 @@ local function updateGame(frame)
         end
 
         if #hitPlayers > 0 then
-            deathStart = now()
+            deathStart = frame
             deathFreeze = true
 
             -- both players killed each other simultaneously
@@ -134,7 +134,7 @@ local function updateGame(frame)
         end
     end
 
-    if deathStart and now() - deathStart > const.deathDuration then
+    if deathStart and frame - deathStart > const.deathDuration then
         players[1]:respawn()
         players[2]:respawn()
         deathStart = nil
@@ -226,7 +226,7 @@ function scene.update()
         end
     end
 
-    net.flush() -- send state hashes this frame
+    net.flush()
 end
 
 function scene.draw()
@@ -238,7 +238,7 @@ function scene.draw()
     if net.connected then
         local rtt = net.getRtt()
         lg.setColor(1, 1, 1)
-        lg.printf(rtt .. "MS - " .. scene.inputDelay .. "F" , 0, 1, const.resX, "center")
+        lg.printf(rtt .. "MS " .. scene.inputDelay .. "F" , 0, 1, const.resX, "center")
     end
     draw.finalize()
 end
