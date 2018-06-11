@@ -202,7 +202,7 @@ function draw.menuBase(noTitle)
     lg.rectangle("fill", 0, 0, const.resX, const.resY)
 
     if not noTitle then
-        local c = math.cos(love.timer.getTime() * 2 * math.pi * 0.2) * 0.5 + 0.5
+        local c = math.cos(love.timer.getTime() * 2 * math.pi * 0.5) * 0.5 + 0.5
         c = c * 0.15 + 0.85
         lg.setColor(c, c, c)
         lg.printf("HOKORI", 0, 2, const.resX, "center")
