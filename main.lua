@@ -21,7 +21,7 @@ function now()
     return frameCounter
 end
 
-function love.load()
+function love.load(arg)
     draw.setWindowSize()
     draw.initBackground()
 
@@ -37,7 +37,13 @@ function love.load()
         end
     end
 
-    scenes.enter(scenes[env.ENTRY_SCENE])
+    if arg[1] == "--host" then
+        scenes.enter(scenes.hostGame)
+    elseif arg[1] == "--connect" then
+        scenes.enter(scenes.joinGame, arg[2])
+    else
+        scenes.enter(scenes[env.ENTRY_SCENE])
+    end
 end
 
 function love.update()

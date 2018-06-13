@@ -8,8 +8,8 @@ local util = require("util")
 
 local scene = {name = "joinGame"}
 
-function scene.enter()
-    net.connect("localhost")
+function scene.enter(address)
+    net.connect(address or "localhost")
 end
 
 function scene.update()
