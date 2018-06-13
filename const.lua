@@ -75,7 +75,7 @@ local const = {
     walkBackwardVel = 0.18,
     normalHitbox = {"normal", -5, -10, 15, 8},
 
-    dashInputWindow = 8,
+    dashInputWindow = 10,
     dashFowardVel = 1.0,
     dashBackwardVel = 1.0,
     dashDuration = 12,
