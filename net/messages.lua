@@ -68,12 +68,13 @@ function messages.deserialize(str)
 end
 
 registerMessage("clientHello", "z", {"version"})
-registerMessage("hostHello", "BB", {"success", "reason"})
+registerMessage("hostHello", "BBs2", {"success", "reason", "gameInfo"})
 -- the first byte in "inputState" is from "frame", the second from "frame" - 1, etc.
 registerMessage("playerInput", "I4s1", {"frame", "inputStates"}, channels.inputUpdates)
 registerMessage("playerStateHash", "I4c16", {"frame", "playerStateHash"}, channels.stateHashes)
 registerMessage("desyncDetected", "I4", {"frame"})
 registerMessage("playerState", "I4s1", {"frame", "playerState"})
+registerMessage("rematch", "B", {"rematch"})
 
 -- dummy messages
 registerMessage("nop")

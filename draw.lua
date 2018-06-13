@@ -183,10 +183,6 @@ function draw.game()
     lg.printf(tostring(players[1].score), scoreFromX, 1, scoreToX)
     lg.setColor(getScoreBlinkColor(2))
     lg.printf(tostring(players[2].score), scoreFromX, 1, scoreToX, "right")
-
-    if scenes.current.message then
-        lg.printf(scenes.current.message, 0, const.topBarHeight + 1, const.resX, "center")
-    end
 end
 
 function draw.help()

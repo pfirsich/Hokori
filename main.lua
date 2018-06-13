@@ -42,7 +42,7 @@ function love.load(arg)
     elseif arg[1] == "--connect" then
         scenes.enter(scenes.joinGame, arg[2])
     else
-        scenes.enter(scenes[env.ENTRY_SCENE])
+        scenes.enter(scenes[env.ENTRY_POINT])
     end
 end
 

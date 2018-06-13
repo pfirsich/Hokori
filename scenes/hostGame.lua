@@ -9,7 +9,7 @@ local util = require("util")
 local scene = {name = "hostGame"}
 
 function scene.enter()
-    net.host()
+    net.host({firstTo = scenes.game.firstTo})
 end
 
 function scene.update()

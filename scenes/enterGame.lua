@@ -4,13 +4,14 @@ local sounds = require("sounds")
 local const = require("const")
 local net = require("net")
 local messages = require("net.messages")
+local net = require("net")
 
 local scene = {name = "enterGame"}
 
 local exitTime
 
 function scene.enter(delay)
-    exitTime = love.timer.getTime() + (delay or 3.0)
+    exitTime = love.timer.getTime() + (net.connected and 2.5 or 1)
 end
 
 function scene.update()

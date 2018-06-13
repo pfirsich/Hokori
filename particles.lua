@@ -117,4 +117,10 @@ function particles.updateAndDraw(dt)
     end
 end
 
+function particles.clear()
+    for i = #particles, 1, -1 do
+        table.remove(particles, i)
+    end
+end
+
 return particles

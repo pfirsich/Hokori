@@ -13,24 +13,24 @@ local FrameDict = require("util.framedict")
 
 local scene = {name = "game"}
 
-scene.inputDelay = 0
-
-scene.message = "testing"
-
-local playerStates = {
-    FrameDict(const.maxSavedPlayerStates),
-    FrameDict(const.maxSavedPlayerStates),
+-- accessed and modified from a number of places (bad design)
+scene.gameInfo = {
+    firstTo = nil,
 }
 
-local remotePlayerStateHashes = {}
+local inputDelay
+local hudMessage
 
-local lastUpdateFrame = 0
+local playerStates
+local remotePlayerStateHashes
 
-local localPlayer = nil -- stays nil for local multiplayer
-local remotePlayer = nil
+local lastUpdateFrame
 
-local deathStart = nil
-local deathFreeze = false
+local localPlayer
+local remotePlayer
+
+local deathStart
+local deathFreeze
 
 local function assertInputReader()
     assert(true, "This input reader is for remote players only and something went wrong if this was called.")
@@ -64,6 +64,26 @@ local function prepareInputBuffers()
 end
 
 function scene.enter()
+    assert(scene.gameInfo.firstTo)
+
+    inputDelay = 0
+    hudMessage = ""
+
+    playerStates = {
+        FrameDict(const.maxSavedPlayerStates),
+        FrameDict(const.maxSavedPlayerStates),
+    }
+    remotePlayerStateHashes = {}
+
+    frameCounter = 1
+    lastUpdateFrame = 0
+    localPlayer = nil -- stays nil for local multiplayer
+    remotePlayer = nil
+    deathStart = nil
+    deathFreeze = false
+
+    particles.clear()
+
     players[1] = players.Player(1, const.spawnEdgeDistance)
     players[2] = players.Player(2, const.resX - const.spawnEdgeDistance)
 
@@ -135,29 +155,34 @@ local function updateGame(frame)
     end
 
     if deathStart and frame - deathStart > const.deathDuration then
+        deathStart = nil
+
+        if players[1].score >= scene.gameInfo.firstTo then
+            scenes.enter(scenes.playerWins, "PLAYER 1")
+            return
+        elseif players[2].score >= scene.gameInfo.firstTo then
+            scenes.enter(scenes.playerWins, "PLAYER 2")
+            return
+        end
+
         players[1]:respawn()
         players[2]:respawn()
-        deathStart = nil
     end
-end
-
-local function setMessage(msg)
-    scene.message = msg or ""
 end
 
 function scene.update()
     for i = 1, 2 do
         if players[i].isLocal then
             if deathStart then -- in death animation
-                players[i].inputBuffer:setInput(scene.frameCounter, 0) -- all false
+                players[i].inputBuffer:setInput(frameCounter, 0) -- all false
             else
-                players[i].inputBuffer:readInput(scene.frameCounter)
+                players[i].inputBuffer:readInput(frameCounter)
             end
         end
     end
 
     if net.connected then
-        net.send(messages.playerInput, scene.frameCounter,
+        net.send(messages.playerInput, frameCounter,
             localPlayer.inputBuffer:serialize(const.numNetUpdateInputFrames))
 
         local msg = net.getMessage()
@@ -183,19 +208,19 @@ function scene.update()
         end
 
         local rtt = net.getRtt()
-        scene.inputDelay = math.max(const.minInputDelay,
+        inputDelay = math.max(const.minInputDelay,
             math.ceil(rtt / 2.0 / 1000 * const.simFps))
     else
-        scene.inputDelay = 0
+        inputDelay = 0
     end
 
-    local updateUntil = scene.frameCounter - scene.inputDelay
+    local updateUntil = frameCounter - inputDelay
     while lastUpdateFrame < updateUntil do
         local updateFrame = lastUpdateFrame + 1
         if players[1].inputBuffer:getFrame(updateFrame) and
                 players[2].inputBuffer:getFrame(updateFrame) then
             updateGame(updateFrame)
-            setMessage()
+            hudMessage = ""
             if net.connected then
                 playerStates[1]:set(updateFrame, players[1]:fullState())
                 playerStates[2]:set(updateFrame, players[2]:fullState())
@@ -203,7 +228,7 @@ function scene.update()
                     playerStates[localPlayer.id][updateFrame]:getHash())
             end
         else
-            setMessage("WAITING")
+            hudMessage = ("WAITING")
             break
         end
     end
@@ -216,17 +241,19 @@ function scene.update()
             if playerState:getHash() ~= stateHash.hash then
                 print("Desync on frame", stateHash.frame)
                 print("local state of remote player", stateHash.frame, playerState)
-                setMessage("DESYNC")
+                hudMessage = ("DESYNC")
                 -- TODO: desync recovery
                 net.send(messages.desyncDetected, stateHash.frame)
             else
-                setMessage()
+                hudMessage = ""
             end
             table.remove(remotePlayerStateHashes, i)
         end
     end
 
     net.flush()
+
+    frameCounter = frameCounter + 1
 end
 
 function scene.draw()
@@ -235,11 +262,14 @@ function scene.draw()
     if lk.isDown("f1") then
         draw.help()
     end
-    if net.connected then
+    lg.setColor(1, 1, 1)
+    if net.connected and hudMessage == "" then
         local rtt = net.getRtt()
-        lg.setColor(1, 1, 1)
-        lg.printf(rtt .. "MS " .. scene.inputDelay .. "F" , 0, 1, const.resX, "center")
+        hudMessage = rtt .. "MS " .. inputDelay .. "F"
+        --lg.printf(rtt .. "MS " .. inputDelay .. "F" , 0, 1, const.resX, "center")
     end
+    lg.printf(hudMessage, 0, const.topBarHeight + 1, const.resX, "center")
+    lg.printf("FT " .. scene.gameInfo.firstTo, 0, 1, const.resX, "center")
     draw.finalize()
 end
 

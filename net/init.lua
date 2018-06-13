@@ -1,8 +1,10 @@
 local enet = require("enet")
+local mp = require("libs.MessagePack")
 
 local const = require("const")
 local messages = require("net.messages")
 local utable = require("util.table")
+local scenes = require("scenes")
 
 local net = {}
 
@@ -29,7 +31,11 @@ messageHandlers[messages.clientHello.id] = function(message, event)
     else
         -- TODO: Check version
         clientPeer = event.peer
-        net.send(messages.hostHello, {success = 1, reason = 0})
+        net.send(messages.hostHello, {
+            success = 1,
+            reason = 0,
+            gameInfo = mp.pack(scenes.game.gameInfo),
+        })
         net.connected = true
     end
 end
@@ -37,12 +43,13 @@ end
 messageHandlers[messages.hostHello.id] = function(message, event)
     if message.success then
         net.connected = true
+        scenes.game.gameInfo = mp.unpack(message.gameInfo)
     else
         print("Not connected. Reason:", message.reason)
     end
 end
 
-function net.host(port)
+function net.host(gameInfo, port)
     local address = "*"
     port = port or const.defaultPort
     print("Hosting on", address, port)
