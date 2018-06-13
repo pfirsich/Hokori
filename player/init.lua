@@ -22,7 +22,7 @@ function PlayerState.deserialize(str)
         time = values[2],
         visible = values[3] > 0,
         posX = values[4],
-        hitboxCounter = values[5],
+        nextHitboxId = values[5],
         lastHitBy = values[6],
         state = {id = values[7]},
     }
@@ -33,7 +33,7 @@ function PlayerState:initialize(player)
     self.time = player.time
     self.visible = player.visible
     self.posX = player.posX
-    self.hitboxCounter = player.hitboxCounter
+    self.nextHitboxId = player.nextHitboxId
     self.lastHitBy = player.lastHitBy
     self.stateId = player.state.id -- TODO: more state serialization
 
@@ -45,7 +45,7 @@ end
 function PlayerState:serialize()
     if not self.serialization then
         self.serialization = ld.pack("string", self.format, self.score, self.time,
-            self.visible and 1 or 0, self.posX, self.hitboxCounter, self.lastHitBy,
+            self.visible and 1 or 0, self.posX, self.nextHitboxId, self.lastHitBy,
             self.stateId)
     end
     return self.serialization
@@ -60,7 +60,7 @@ end
 
 function PlayerState:__tostring()
     return ("score: %d, time: %d, v: %s, pos: %f, hbC: %d, lHb: %d, state: %d"):format(
-        self.score, self.time, tostring(self.visible), self.posX, self.hitboxCounter,
+        self.score, self.time, tostring(self.visible), self.posX, self.nextHitboxId,
         self.lastHitBy, self.stateId)
 end
 
@@ -88,8 +88,8 @@ function PlayerClass:initialize(playerId, spawnPos)
         length = 0,
     }
     self.hitbox = nil
-    self.hitboxCounter = 0
-    self.lastHitBy = -1
+    self.nextHitboxId = 1
+    self.lastHitBy = 0
     self:setState(states.Normal)
 end
 
@@ -121,12 +121,12 @@ function PlayerClass:setHitbox(hitbox)
         self.hitbox = nil
     else
         self.hitbox = {
-            id = self.hitboxCounter,
+            id = self.nextHitboxId,
             _type = hitbox[1],
             x = hitbox[2], y = hitbox[3],
             w = hitbox[4], h = hitbox[5],
         }
-        self.hitboxCounter = self.hitboxCounter + 1
+        self.nextHitboxId = self.nextHitboxId + 1
     end
 end
 
