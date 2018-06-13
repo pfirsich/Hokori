@@ -63,4 +63,9 @@ function love.keypressed(...)
     if scenes.current.keypressed then
         scenes.current.keypressed(...)
     end
+
+    local key = select(1, ...)
+    if key == "f" and (lk.isDown("lctrl") or lk.isDown("rctrl")) then
+        flaschentaschen.saveLastFrame("frame.ppm")
+    end
 end

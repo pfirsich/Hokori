@@ -8,6 +8,8 @@ local rgbBytes = nil
 local pixelCount = nil
 local connected = false
 
+local lastFrame = nil
+
 function flaschentaschen.initialize(_pixelCount, host, port)
     host = host or "localhost"
     port = port or 1337
@@ -41,6 +43,16 @@ function flaschentaschen.sendCanvas(canvas)
         local data = "P6 " .. imageData:getWidth() .. " " .. imageData:getHeight() ..
             " 255\n" .. ffi.string(rgbBytes, pixelCount * 3)
         sock:send(data)
+        lastFrame = data
+    end
+end
+
+function flaschentaschen.saveLastFrame(filename)
+    if lastFrame then
+        local file = assert(love.filesystem.newFile(filename, "w"))
+        assert(file:write(lastFrame))
+        assert(file:close())
+        print("Saved last frame.")
     end
 end
 
