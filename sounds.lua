@@ -1,4 +1,5 @@
 require("libs.slam")
+local const = require("const")
 
 local sounds = {}
 
@@ -23,7 +24,7 @@ prepare("strikeBlock", 0.3)
 prepare("die")
 prepare("menu")
 
-sounds.music = src("music.ogg", 0.05, "stream")
+sounds.music = src("music.ogg", const.musicVolume, "stream")
 sounds.music:setLooping(true)
 sounds.music:play()
 

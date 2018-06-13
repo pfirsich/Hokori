@@ -136,6 +136,9 @@ local const = {
         {0, 0, 1}, "BLOCK", {0.8, 0.8, 0.8}, " BEATS ", {1, 0, 0}, "STRIKE\n",
     },
 
+    menuOverlayAlpha = 0.5,
+    musicVolume = 0.04,
+
     defaultPort = 4574,
     -- this is pretty much the low end of the maximum acceptable ping
     defaultRtt = 120,

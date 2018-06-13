@@ -194,7 +194,7 @@ end
 
 function draw.menuBase(noTitle)
     draw.background()
-    lg.setColor(0, 0, 0, 0.5)
+    lg.setColor(0, 0, 0, const.menuOverlayAlpha)
     lg.rectangle("fill", 0, 0, const.resX, const.resY)
 
     if not noTitle then
