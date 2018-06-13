@@ -11,6 +11,6 @@ local env = {
 
 env.FLASCHENTASCHEN = env.STAB_MODE
 env.CONTROL_SET = env.STAB_MODE and "stab" or "keyboard"
-env.ENTRY_SCENE = env.STAB_MODE and "localMultiplayer" or "mainmenu"
+env.ENTRY_SCENE = env.STAB_MODE and "game" or "mainmenu"
 
 return env
