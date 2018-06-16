@@ -117,8 +117,6 @@ local function explodeDeadPlayers()
 end
 
 local function updateGame(frame)
-    lastUpdateFrame = frame
-
     if deathFreeze then
         if frame - deathStart > const.deathFreezeDuration then
             deathFreeze = false
@@ -170,7 +168,7 @@ local function updateGame(frame)
     end
 end
 
-function scene.update()
+local function readInput(frameCounter)
     for i = 1, 2 do
         if players[i].isLocal then
             if deathStart then -- in death animation
@@ -180,60 +178,43 @@ function scene.update()
             end
         end
     end
+end
 
-    if net.connected then
-        net.send(messages.playerInput, frameCounter,
-            localPlayer.inputBuffer:serialize(const.numNetUpdateInputFrames))
-
-        local msg = net.getMessage()
-        while msg do
-            if msg.class == messages.playerInput then
-                remotePlayer.inputBuffer:deserialize(msg.frame, msg.inputStates)
-            elseif msg.class == messages.playerStateHash then
-                table.insert(remotePlayerStateHashes, {
-                    frame = msg.frame,
-                    hash = msg.playerStateHash,
-                })
-            elseif msg.class == messages.desyncDetected then
-                -- TODO: desync recovery
-                net.send(messages.playerState, msg.frame,
-                    playerStates[localPlayer.id][msg.frame]:serialize())
-            elseif msg.class == messages.playerState then
-                print("remote state of remote player:", msg.frame,
-                    players.PlayerState.deserialize(msg.playerState))
-            else
-                print("Unknown message:", msg.class.id, msg.class.name)
-            end
-            msg = net.getMessage()
-        end
-
-        local rtt = net.getRtt()
-        inputDelay = math.max(const.minInputDelay,
-            math.ceil(rtt / 2.0 / 1000 * const.simFps))
-    else
-        inputDelay = 0
-    end
-
-    local updateUntil = frameCounter - inputDelay
-    while lastUpdateFrame < updateUntil do
-        local updateFrame = lastUpdateFrame + 1
-        if players[1].inputBuffer:getFrame(updateFrame) and
-                players[2].inputBuffer:getFrame(updateFrame) then
-            updateGame(updateFrame)
-            hudMessage = ""
-            if net.connected then
-                playerStates[1]:set(updateFrame, players[1]:fullState())
-                playerStates[2]:set(updateFrame, players[2]:fullState())
-                net.send(messages.playerStateHash, updateFrame,
-                    playerStates[localPlayer.id][updateFrame]:getHash())
-            end
+local function processNetMessages()
+    local msg = net.getMessage()
+    while msg do
+        if msg.class == messages.playerInput then
+            remotePlayer.inputBuffer:deserialize(msg.frame, msg.inputStates)
+        elseif msg.class == messages.playerStateHash then
+            table.insert(remotePlayerStateHashes, {
+                frame = msg.frame,
+                hash = msg.playerStateHash,
+            })
+        elseif msg.class == messages.desyncDetected then
+            -- TODO: desync recovery
+            net.send(messages.playerState, msg.frame,
+                playerStates[localPlayer.id][msg.frame]:serialize())
+        elseif msg.class == messages.playerState then
+            print("remote state of remote player:", msg.frame,
+                players.PlayerState.deserialize(msg.playerState))
         else
-            hudMessage = ("WAITING")
-            break
+            print("Unknown message:", msg.class.id, msg.class.name)
         end
+        msg = net.getMessage()
     end
+end
 
-    -- check for desync
+local function getInputDelay(rtt)
+    return math.max(const.minInputDelay, math.ceil(rtt / 2.0 / 1000 * const.simFps))
+end
+
+local function savePlayerStates(frame)
+    playerStates[1]:set(frame, players[1]:fullState())
+    playerStates[2]:set(frame, players[2]:fullState())
+    net.send(messages.playerStateHash, frame, playerStates[localPlayer.id][frame]:getHash())
+end
+
+local function checkForDesync()
     for i = #remotePlayerStateHashes, 1, -1 do
         local stateHash = remotePlayerStateHashes[i]
         local playerState = playerStates[remotePlayer.id][stateHash.frame]
@@ -241,7 +222,7 @@ function scene.update()
             if playerState:getHash() ~= stateHash.hash then
                 print("Desync on frame", stateHash.frame)
                 print("local state of remote player", stateHash.frame, playerState)
-                hudMessage = ("DESYNC")
+                hudMessage = "DESYNC"
                 -- TODO: desync recovery
                 net.send(messages.desyncDetected, stateHash.frame)
             else
@@ -250,6 +231,41 @@ function scene.update()
             table.remove(remotePlayerStateHashes, i)
         end
     end
+end
+
+function scene.update()
+    readInput(frameCounter)
+
+    if net.connected then
+        net.send(messages.playerInput, frameCounter,
+            localPlayer.inputBuffer:serialize(const.numNetUpdateInputFrames))
+
+        -- reads remote players input, saves state hashes and responds to desync
+        -- notifications with debug info
+        processNetMessages()
+
+        inputDelay = getInputDelay(net.getRtt())
+    end
+
+    hudMessage = ""
+    local updateUntil = frameCounter - inputDelay
+    while lastUpdateFrame < updateUntil do
+        local updateFrame = lastUpdateFrame + 1
+        if players[1].inputBuffer:getFrame(updateFrame) and
+                players[2].inputBuffer:getFrame(updateFrame) then
+            updateGame(updateFrame)
+            lastUpdateFrame = updateFrame
+
+            if net.connected then
+                savePlayerStates(updateFrame)
+            end
+        else
+            hudMessage = "WAITING"
+            break
+        end
+    end
+
+    checkForDesync()
 
     net.flush()
 
