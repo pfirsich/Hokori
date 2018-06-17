@@ -48,6 +48,7 @@ end
 
 function Tackle:hit(_type)
     if _type == "normal" then
+        sounds.yomi:play()
         return true
     else
         return states.Base.hit(self, _type)

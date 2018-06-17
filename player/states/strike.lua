@@ -40,4 +40,16 @@ function Strike:update()
     end
 end
 
+function Strike:hit(_type)
+    if _type ~= "normal" then
+        if self.player.time - self.start < const.strikeActive[1] then
+            sounds.counter:play()
+        end
+        if self.player.time - self.start > const.strikeActive[2] then
+            sounds.punish:play()
+        end
+    end
+    return states.Base.hit(self, _type)
+end
+
 return Strike

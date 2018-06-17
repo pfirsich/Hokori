@@ -9,8 +9,10 @@ local net = require("net")
 local scene = {name = "enterGame"}
 
 local exitTime
+local soundPlayed
 
 function scene.enter(delay)
+    soundPlayed = false
     exitTime = love.timer.getTime() + (net.connected and 2.5 or 1)
 end
 
@@ -29,6 +31,11 @@ function scene.draw()
     local text = "FIGHT!"
     if dt > 1 then
         text = tostring(math.floor(dt))
+    else
+        if not soundPlayed then
+            soundPlayed = true
+            sounds.fight:play()
+        end
     end
     lg.printf(text, 0, 20, const.resX, "center")
 
